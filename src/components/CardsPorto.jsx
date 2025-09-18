@@ -273,7 +273,7 @@ const CardsPorto = () => {
       {visibleItems < cardData.length && (
         <button
           onClick={loadMore}
-          className="mt-8 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          className="mt-8 px-6 py-2 bg-[#222222] text-white rounded-md hover:bg-[#535353] transition duration-200"
         >
           Load More
         </button>

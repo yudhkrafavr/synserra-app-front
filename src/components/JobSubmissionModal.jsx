@@ -13,6 +13,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
   const [source, setSource] = useState('');
   const [otherSource, setOtherSource] = useState('');
   const today = new Date().toISOString().split('T')[0];
+  const [addToPortfolio, setAddToPortfolio] = useState('no'); 
   
   const getRelativeDate = (dateString) => {
     if (!dateString) return '';
@@ -278,7 +279,9 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
                 </AnimatePresence>
               </div>
             </div>
-            <div>
+            <div className="flex space-x-3 my-4">
+              <div className="w-1/2">
+              <div>
               <label htmlFor="brandName" className="text-sm text-gray-500">
                 Brand Name
               </label>
@@ -293,6 +296,37 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
                 required
               /></span>
               </div>
+              </div>
+              <div className="w-1/2">
+                <label htmlFor="date" className="text-sm text-gray-500">
+                  Add to Portfolio?
+                </label>
+                <div className="border-b border-[#FE9D2B] flex items-center space-x-4 outline-none py-1">
+    <label className="inline-flex items-center">
+      <input
+        type="radio"
+        className="form-radio text-[#FE9D2B]"
+        name="addToPortfolio"
+        value="yes"
+        checked={addToPortfolio === 'yes'}
+        onChange={(e) => setAddToPortfolio(e.target.value)}
+      />
+      <span className="text-sm ml-2">Yes</span>
+    </label>
+    <label className="inline-flex items-center">
+      <input
+        type="radio"
+        className="form-radio text-[#FE9D2B]"
+        name="addToPortfolio"
+        value="no"
+        checked={addToPortfolio === 'no'}
+        onChange={(e) => setAddToPortfolio(e.target.value)}
+      />
+      <span className="text-sm ml-2">No</span>
+    </label>
+  </div>
+              </div>
+            </div>
             <div className="my-4">
               <label htmlFor="source" className="text-sm text-gray-500 block mb-1">
                 Source
