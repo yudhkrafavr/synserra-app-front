@@ -45,6 +45,7 @@ const ProjectsPagination = ({ currentPage, totalPages, onPageChange }) => {
 
 export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState('PENDING');
   const projectsPerPage = 3;
   
   const [projects, setProjects] = useState([
@@ -92,6 +93,11 @@ export default function Dashboard() {
     }
   ]);
 
+  // Filter projects based on active tab
+  const filteredProjects = activeTab === 'PENDING' 
+    ? projects.filter(project => project.status === 'PENDING' || project.status === 'IN PROGRESS')
+    : projects.filter(project => project.status === 'COMPLETED');
+
   const dashboardStats = [
     {
       id: 1,
@@ -135,30 +141,54 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold">Projects</h2>
             <div className="my-6 text-[#B5B5B5]">
               <ul className="flex space-x-6 text-sm items-center">
-                <li className="text-lg text-black">Latest Project</li>
-                <li>Pending</li>
-                <li>Completed</li>
+                <li 
+                  className={`cursor-pointer ${activeTab === 'PENDING' ? 'text-black text-lg' : 'text-[#B5B5B5]'}`}
+                  onClick={() => {
+                    setActiveTab('PENDING');
+                    setCurrentPage(1); // Reset to first page when changing tabs
+                  }}
+                >
+                  Pending
+                </li>
+                <li 
+                  className={`cursor-pointer ${activeTab === 'COMPLETED' ? 'text-black text-lg' : 'text-[#B5B5B5]'}`}
+                  onClick={() => {
+                    setActiveTab('COMPLETED');
+                    setCurrentPage(1); // Reset to first page when changing tabs
+                  }}
+                >
+                  Completed
+                </li>
               </ul>
             </div>
           </div>
           <div>
-            {projects
-              .slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage)
-              .map((project) => (
-              <ProjectCard
-                id={project.id}
-                status={project.status}
-                projectName={project.projectName}
-                targetDate={project.targetDate}
-                price={project.price}
-              />
-            ))}
+            {filteredProjects.length > 0 ? (
+              filteredProjects
+                .slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage)
+                .map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    status={project.status}
+                    projectName={project.projectName}
+                    targetDate={project.targetDate}
+                    price={project.price}
+                  />
+                ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No {activeTab.toLowerCase()} projects found.
+              </div>
+            )}
           </div>
-          <ProjectsPagination
-            currentPage={currentPage}
-            totalPages={Math.ceil(projects.length / projectsPerPage)}
-            onPageChange={setCurrentPage}
-          />
+          {filteredProjects.length > 0 && (
+            <ProjectsPagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredProjects.length / projectsPerPage)}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
         <div className="w-[40%]">
           <div className="w-[100%] border-b-1 border-[#DDDDDD]">
