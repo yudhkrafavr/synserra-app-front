@@ -1,0 +1,113 @@
+import React, { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { FaStar, FaPaperclip, FaTimes } from "react-icons/fa";
+
+const FileUploader = ({ onFileSelect }) => {
+  const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFileName(file.name);
+      onFileSelect(file);
+    }
+  };
+
+  const handleRemoveFile = (e) => {
+    e.stopPropagation();
+    setFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onFileSelect(null);
+  };
+
+  return (
+    <label className="flex items-center cursor-pointer w-full">
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <div className="flex items-center w-full min-w-[110px] max-w-[110px] px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50">
+        <FaPaperclip className="text-gray-500 mr-2 flex-shrink-0" />
+        <span className="text-sm text-gray-600 truncate flex-grow">
+          {fileName || 'Attach file'}
+        </span>
+        {fileName && (
+          <button 
+            type="button" 
+            onClick={handleRemoveFile}
+            className="ml-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
+          >
+            <FaTimes size={12} />
+          </button>
+        )}
+      </div>
+    </label>
+  );
+};
+
+const StarRating = ({ rating, setRating }) => {
+  return (
+    <div className="flex space-x-1 mt-4">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <FaStar
+          key={star}
+          className={`cursor-pointer ${star <= rating ? 'text-[#302E2C]' : 'text-gray-300'}`}
+          onClick={() => setRating(star)}
+        />
+      ))}
+    </div>
+  );
+};
+
+const ProjectDetails = () => {
+  const [rating, setRating] = useState(0);
+  const [timeSpent, setTimeSpent] = useState('');
+
+  return (
+    <motion.div 
+      className="flex items-start space-x-3"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: 0.1 }}
+    >
+      <div>
+        <h3 className="text-sm">Overall experience!</h3>
+        <StarRating
+          rating={rating}
+          setRating={setRating}
+        />
+      </div>
+      <div>
+        <h3 className="text-sm mb-2">Design Concept</h3>
+        <FileUploader 
+          onFileSelect={(file) => console.log('Design Concept file:', file)}
+        />
+      </div>
+      <div>
+        <h3 className="text-sm mb-2">Delivery Files</h3>
+        <FileUploader 
+          onFileSelect={(file) => console.log('Delivery Files file:', file)}
+        />
+      </div>
+      <div>
+        <h3 className="text-sm mb-2">Hours spent</h3>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={timeSpent}
+          onChange={(e) => setTimeSpent(e.target.value)}
+          placeholder="0.0"
+          className="w-25 p-1 border border-gray-300 rounded text-sm"
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+export default ProjectDetails;
