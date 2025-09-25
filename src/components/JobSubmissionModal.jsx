@@ -100,7 +100,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
           />
         </div>
         <div className="w-[55%] p-7">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold text-gray-800">
               {templateTitle ? `${templateTitle} Template Job Submission` : 'Template Job Submission'}
             </h2>

@@ -111,11 +111,11 @@ const ProjectCard = ({
                 </AnimatePresence>
               </div>
             )}
-            <div className="flex items-center space-x-4 pt-4">
+            <div className="flex items-center space-x-1 pt-4">
               {status !== 'COMPLETED' && (
                 <>
                   <DashboardButtonMain 
-                    text="COMPLETE PROJECT" 
+                    text={status === 'PENDING' || status === 'IN PROGRESS' ? "SET AS DELIVERED" : "COMPLETE PROJECT"} 
                   />
                   <DashboardButtonSecondary 
                     text="CANCEL" 
