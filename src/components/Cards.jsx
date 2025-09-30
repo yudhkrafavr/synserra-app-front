@@ -1,76 +1,83 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import defaultFile from "../assets/file-template.svg";
 import Levels from "./Levels";
 import LogoShape from "./LogoShape";
 import CardButton from "./CardButton";
 
-const cardData = [
-  {
-    id: 1,
-    title: "The Refresher’s",
-    estimatedValue: 2567,
-    downloads: 100,
-    imageUrl: "https://placehold.co/400x800",
-    colorLevel: 3,
-    logoShape: "rectangle",
-    tags: "Simple, Clean, Strong Branding, Multipurpose, Strong Color",
-    industries: "Sneakers, Apparels, Toys, Furniture",
-  },
-  {
-    id: 2,
-    title: "Retails CO",
-    estimatedValue: 2567,
-    downloads: 100,
-    imageUrl: "https://placehold.co/400x800",
-    colorLevel: 3,
-    logoShape: "square",
-    tags: "Simple, Clean, Strong Branding, Multipurpose, Strong Color",
-    industries: "Sneakers, Apparels, Toys, Furniture",
-  },
-  {
-    id: 3,
-    title: "Thermos",
-    estimatedValue: 2567,
-    downloads: 100,
-    imageUrl: "https://placehold.co/400x800",
-    colorLevel: 3,
-    logoShape: "rectangle",
-    tags: "Simple, Clean, Strong Branding, Multipurpose, Strong Color",
-    industries: "Sneakers, Apparels, Toys, Furniture",
-  },
-  {
-    id: 4,
-    title: "UrbanVibe",
-    estimatedValue: 3200,
-    downloads: 145,
-    imageUrl: "https://placehold.co/400x800/2c3e50/ffffff",
-    colorLevel: 2,
-    logoShape: "square",
-    tags: "Modern, Minimalist, Urban, Versatile, Bold Typography",
-    industries: "Streetwear, Music, Sports, Lifestyle",
-  },
-  {
-    id: 5,
-    title: "EcoLife",
-    estimatedValue: 2850,
-    downloads: 210,
-    imageUrl: "https://placehold.co/400x800/27ae60/ffffff",
-    colorLevel: 1,
-    logoShape: "rectangle",
-    tags: "Eco-friendly, Organic, Natural, Sustainable, Fresh",
-    industries: "Health, Food, Beauty, Home Decor, Wellness",
-  },
-];
+const API_BASE_URL = 'http://localhost:8084';
 
 const Cards = ({ onCreateProjectClick }) => {
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const UPLOADS_BASE_URL = "http://localhost:8084/utility/uploads/";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/template/all`, {
+          headers: {
+            'accept': '*/*'
+          }
+        });
+  
+        if (response.data.success && response.data.data) {
+          const formattedCards = response.data.data.map(card => {
+            const logoPath = card.lastVersion?.logoUrl;
+            const bannerPath = card.lastVersion?.mainBannerUrl;
+  
+            return {
+              id: card.templateId,
+              title: card.templateName,
+              estimatedValue: card.estimatedValue,
+              downloads: card.downloadCount,
+              imageUrl: bannerPath ? `${UPLOADS_BASE_URL}${bannerPath}` : "https://placehold.co/400x800",
+              logoUrl: logoPath ? `${UPLOADS_BASE_URL}${logoPath}` : defaultFile,
+              colorLevel: card.colorLevel,
+              logoShape: card.logoType?.toLowerCase(),
+              tags: card.tag ? card.tag.split(",").map(tag => tag.trim()).join(", ") : "",
+              industries: card.industries ? card.industries.split(",").map(industry => industry.trim()).join(", ") : "",
+              description: card.description,
+              lastVersion: card.lastVersion
+            };
+          });
+  
+          setCards(formattedCards);
+        } else {
+          throw new Error("Invalid response format from server");
+        }
+      } catch (err) {
+        console.error("Error fetching data: ", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="w-screen flex justify-center py-10">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="w-screen flex justify-center py-10">Error: {error}</div>;
+  }
+
+  if (cards.length === 0) {
+    return <div className="w-screen flex justify-center py-10">No templates found</div>;
+  }
+
   return (
     <div className="w-screen flex py-10 justify-center min-w-[1100px]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[1240px] place-items-center px-4">
-        {cardData.map((card) => (
+        {cards.map((card) => (
           <div key={card.id} className="w-[340px]">
             <div className="flex items-center space-x-4">
               <div>
-                <img src={defaultFile} alt="arrowDown" className="h-12" />
+                <img src={card.logoUrl} alt="template" className="h-25" />
               </div>
               <div className="text-2xl">{card.title}</div>
             </div>
@@ -87,7 +94,11 @@ const Cards = ({ onCreateProjectClick }) => {
               </div>
             </div>
             <div className="bg-[#E4E4E4] p-7 shadow-sm">
-              <img src={card.imageUrl} alt={card.title} />
+              <img 
+                src={card.imageUrl} 
+                alt={card.title} 
+                className="w-full h-auto"
+              />
             </div>
             <div className="flex items-center justify-between mx-auto py-4">
               <div>

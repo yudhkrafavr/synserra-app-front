@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import catSubmission from "../assets/cat-submission.png";
+import axios from "axios";
 
 const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
   const [projectValue, setProjectValue] = useState('5');
