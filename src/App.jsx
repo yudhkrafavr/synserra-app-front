@@ -60,6 +60,7 @@ function App() {
           onClose={closeSubmissionModal} 
           onSubmit={handleSubmit}
           templateTitle={selectedCard?.title}
+          templateId={selectedCard?.id}
         />  
         <JobSubmittedSuccess 
           isOpen={isSuccessModalOpen} 

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import catSubmission from "../assets/cat-submission.png";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
-const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
+
+const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, templateId }) => {
   const [projectValue, setProjectValue] = useState('5');
   const [clientName, setClientName] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -14,6 +16,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
   const [otherSource, setOtherSource] = useState('');
   const today = new Date().toISOString().split('T')[0];
   const [addToPortfolio, setAddToPortfolio] = useState('no'); 
+  const API_BASE_URL = "http://localhost:8084";
   
   const getRelativeDate = (dateString) => {
     if (!dateString) return '';
@@ -33,23 +36,42 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle }) => {
     return '';
   };
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the form submission to your backend
-    console.log({
-      projectValue,
-      clientName,
-      estimatedDeliveryDate,
-      dueDate,
-      clientContact,
-      source: source === 'Other' ? otherSource : source
-    });
-    
-    // Call the onSubmit prop to handle the modal flow
-    if (onSubmit) {
-      onSubmit();
+  
+    const payload = {
+      projectValue: parseInt(projectValue) || 0,
+      templateName: templateTitle || "Untitled Template",
+      client: clientName,
+      contact: clientContact,
+      brandName: brandName,
+      estDeliveryDate: estimatedDeliveryDate,
+      dueDate: dueDate,
+      source: source === "Other" ? otherSource : source,
+      templateId: templateId,
+      published: addToPortfolio === "yes"
+    };
+  
+    try {
+      const response = await axios.post(`${API_BASE_URL}/project/submit`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*"
+        }
+      });
+  
+      console.log("Submission success:", response.data);
+  
+      if (onSubmit) {
+        onSubmit(response.data);
+      }
+  
+      onClose();
+    } catch (err) {
+      console.error("Error submitting project:", err);
+      alert("Failed to submit project. Please try again.");
     }
-  };
+  };  
 
   // Reset form fields
   const handleReset = () => {

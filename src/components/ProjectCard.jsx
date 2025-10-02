@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
+import axios from "axios";
 import DashboardButtonMain from './DashboardButtonMain';
 import DashboardButtonSecondary from './DashboardButtonSecondary';
 import defaultFile from "../assets/file-template.svg";
 import ProjectDetails from './ProjectDetails';
+
+const API_BASE_URL = "http://localhost:8084";
 
 const formatRemainingDays = (targetDate) => {
   if (!targetDate) return 'No due date';
@@ -27,27 +30,89 @@ const isOverdue = (targetDate) => {
   return dueDate < today;
 };
 
-const ProjectCard = ({ 
+const ProjectCard = ({
   id,
+  code,
   status,
   projectName,
   targetDate,
-  price
+  price,
+  logoUrl,
+  onReload,
+  templateUrl,
+  createdDate
 }) => {
+  const [details, setDetails] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
-  
+  const [loadingAction, setLoadingAction] = useState(false);
+  const UPLOADS_BASE_URL = "http://localhost:8084/utility/uploads/";
+
+  // helper: upload file -> return uploaded fileId
+  const uploadFile = async (file) => {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/utility/upload`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data?.data?.id || null;
+  };
+
   const handleCancelClick = () => {
     setShowCancelModal(true);
   };
 
+  const handleDownload = async () => {
+    if (!templateUrl) {
+      alert("No template available to download.");
+      return;
+    }
+
+    try {
+      setLoadingAction(true);
+
+      const downloadUrl = `${API_BASE_URL}/utility/${templateUrl}.zip`;
+
+      // Hidden <a> to trigger download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", "");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Give backend a moment to update
+      if (onReload) {
+        setTimeout(() => {
+          onReload();
+          setLoadingAction(false);
+        }, 1500);
+      } else {
+        setTimeout(() => setLoadingAction(false), 1500);
+      }
+    } catch (err) {
+      console.error("Download failed:", err);
+      setLoadingAction(false);
+    }
+  };
+
   const handleCancelSubmit = () => {
     if (cancelReason.trim()) {
+      setLoadingAction(true);
       console.log('Cancellation reason:', cancelReason);
-      // Add your cancel submission logic here
-      setShowCancelModal(false);
-      setCancelReason('');
+      // TODO: POST cancel reason with project id
+      setTimeout(() => {
+        setShowCancelModal(false);
+        setCancelReason('');
+        setLoadingAction(false);
+      }, 1000);
     }
   };
 
@@ -56,17 +121,80 @@ const ProjectCard = ({
     setCancelReason('');
   };
 
+  // 🔥 Function1 → for "Set as Delivered"
+  const handleSetAsDelivered = async () => {
+    try {
+      setLoadingAction(true);
+  
+      const response = await axios.post(
+        `${API_BASE_URL}/project/setDelivered`,
+        {
+          projectId: id,   // <- use the id prop
+          reason: ""       // <- always empty string
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      console.log("Set as Delivered:", response.data);
+      if (onReload) onReload();
+      alert("Project marked as delivered!");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to mark as delivered.");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  // 🔥 Function2 → for "Complete Project"
+  const handleCompleteProject = async () => {
+    try {
+      setLoadingAction(true);
+
+      // 1. Upload files if present
+      const designConceptUrl = await uploadFile(details.designConcept);
+      const deliveryFileUrl = await uploadFile(details.deliveryFile);
+
+      // 2. Prepare payload
+      const payload = {
+        projectId: id,
+        rating: details.rating || 0,
+        designConceptUrl: designConceptUrl || "",
+        deliveryFileUrl: deliveryFileUrl || "",
+        hoursSpent: Number(details.timeSpent) || 0
+      };
+
+      console.log("Submitting completion payload:", payload);
+
+      // 3. Submit completion
+      const response = await axios.post(
+        `${API_BASE_URL}/project/completion`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("Complete Project:", response.data);
+      if (onReload) onReload();
+      alert("Project marked as completed!");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to complete project.");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
   return (
     <>
       <div className="flex space-x-5 p-6 border border-[#D9D9D9] w-[700px] rounded-[10px] my-5">
         <div className="w-[80px]">
-          <img src={defaultFile} alt="defaultFile" className="w-[80px]" />
+          <img src={`${UPLOADS_BASE_URL}${logoUrl}`} alt="defaultFile" className="w-[80px]" />
         </div>
         <div className="flex justify-between w-[85%]">
           <div className="w-full">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center space-x-4">
-                <div className="font-bold text-sm">#{id.toString().padStart(4, '0')}</div>
+                <div className="font-bold text-sm">#{code.toString().padStart(4, '0')}</div>
                 <div className={`font-bold text-sm ${
                   status === 'PENDING' ? 'text-[#834B09]' : 
                   status === 'COMPLETED' ? 'text-[#5B5B5B]' : 'text-[#DF8C2A]'
@@ -104,7 +232,7 @@ const ProjectCard = ({
                       className="overflow-hidden"
                     >
                       <div className="py-4">
-                        <ProjectDetails />
+                      <ProjectDetails onDetailsChange={setDetails} />
                       </div>
                     </motion.div>
                   )}
@@ -112,20 +240,20 @@ const ProjectCard = ({
               </div>
             )}
             <div className="flex items-center space-x-1 pt-4">
-              {status !== 'COMPLETED' && (
-                <>
-                  <DashboardButtonMain 
-                    text={status === 'PENDING' || status === 'IN PROGRESS' ? "SET AS DELIVERED" : "COMPLETE PROJECT"} 
-                  />
-                  <DashboardButtonSecondary 
-                    text="CANCEL" 
-                    onClick={handleCancelClick}
-                  />
-                </>
-              )}
-              <DashboardButtonSecondary 
-                text="DOWNLOAD" 
-              />
+            {status === 'PENDING' || status === 'IN_PROGRESS' ? (
+                    <DashboardButtonMain
+                      text="SET AS DELIVERED"
+                      onClick={handleSetAsDelivered}
+                      disabled={loadingAction}
+                    />
+                  ) : (
+                    <DashboardButtonMain
+                      text="COMPLETE PROJECT"
+                      onClick={handleCompleteProject}
+                      disabled={loadingAction}
+                    />
+                  )}
+              <DashboardButtonSecondary text="DOWNLOAD" onClick={handleDownload} />
             </div>
           </div>
           <div>
@@ -186,6 +314,13 @@ const ProjectCard = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 🔥 Global Loading Overlay */}
+      {loadingAction && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
     </>
