@@ -31,9 +31,9 @@ const FileUploader = ({ onFileSelect, label }) => {
         className="hidden"
         onChange={handleFileChange}
       />
-      <div className="flex items-center w-full min-w-[110px] max-w-[150px] px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50">
+      <div className="flex items-center w-[120px] px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50">
         <FaPaperclip className="text-gray-500 mr-2 flex-shrink-0" />
-        <span className="text-sm text-gray-600 truncate flex-grow">
+        <span className="text-sm text-gray-600 truncate flex-grow max-w-[90px]">
           {fileName || label}
         </span>
         {fileName && (
@@ -82,18 +82,18 @@ const ProjectDetails = ({ onDetailsChange }) => {
 
   return (
     <motion.div 
-      className="flex items-start space-x-6 flex-wrap"
+      className="flex items-start space-x-3 flex-wrap"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: 0.1 }}
     >
       <div>
-        <h3 className="text-sm font-medium">Overall experience!</h3>
+        <h3 className="text-[13px] font-medium">Overall experience!</h3>
         <StarRating rating={rating} setRating={setRating} />
       </div>
 
       <div>
-        <h3 className="text-sm mb-2 font-medium">Design Concept</h3>
+        <h3 className="text-[13px] mb-2 font-medium">Design Concept</h3>
         <FileUploader 
           label="Attach file"
           onFileSelect={setDesignConcept}
@@ -101,7 +101,7 @@ const ProjectDetails = ({ onDetailsChange }) => {
       </div>
 
       <div>
-        <h3 className="text-sm mb-2 font-medium">Delivery Files</h3>
+        <h3 className="text-[13px] mb-2 font-medium">Delivery Files</h3>
         <FileUploader 
           label="Attach file"
           onFileSelect={setDeliveryFile}
@@ -109,7 +109,7 @@ const ProjectDetails = ({ onDetailsChange }) => {
       </div>
 
       <div>
-        <h3 className="text-sm mb-2 font-medium">Hours spent</h3>
+        <h3 className="text-[13px] mb-2 font-medium">Hours spent</h3>
         <input
           type="number"
           min="0"
