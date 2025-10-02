@@ -79,21 +79,14 @@ const ProjectCard = ({
       setLoadingAction(true);
 
       const downloadUrl = `${API_BASE_URL}/utility/${templateUrl}.zip`;
-
-      // Hidden <a> to trigger download
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute("download", "");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      window.open(downloadUrl, "_blank");
 
       // Give backend a moment to update
       if (onReload) {
         setTimeout(() => {
           onReload();
           setLoadingAction(false);
-        }, 1500);
+        }, 1000);
       } else {
         setTimeout(() => setLoadingAction(false), 1500);
       }
