@@ -72,7 +72,7 @@ const Cards = ({ onCreateProjectClick }) => {
 
   return (
     <div className="w-screen flex py-10 justify-center min-w-[1100px]">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[1240px] place-items-center px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[1240px] items-start justify-items-center px-4">
         {cards.map((card) => (
           <div key={card.id} className="w-[340px]">
             <div className="flex items-center space-x-4">
