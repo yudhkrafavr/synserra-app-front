@@ -96,18 +96,35 @@ const ProjectCard = ({
     }
   };
 
-  const handleCancelSubmit = () => {
-    if (cancelReason.trim()) {
+  const handleCancelSubmit = async () => {
+    if (!cancelReason.trim()) return;
+
+    try {
       setLoadingAction(true);
-      console.log('Cancellation reason:', cancelReason);
-      // TODO: POST cancel reason with project id
-      setTimeout(() => {
-        setShowCancelModal(false);
-        setCancelReason('');
-        setLoadingAction(false);
-      }, 1000);
+
+      const response = await axios.post(
+        `${API_BASE_URL}/project/cancel`,
+        {
+          projectId: id,          // 👈 use id prop from ProjectCard
+          reason: cancelReason,   // 👈 from modal textarea
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("Cancel Project:", response.data);
+
+      alert("Project cancelled successfully!");
+      if (onReload) onReload(); // refresh list after cancel
+      setShowCancelModal(false);
+      setCancelReason("");
+    } catch (err) {
+      console.error("Cancel error:", err);
+      alert("Failed to cancel project.");
+    } finally {
+      setLoadingAction(false);
     }
   };
+
 
   const handleCloseModal = () => {
     setShowCancelModal(false);
@@ -238,7 +255,7 @@ const ProjectCard = ({
                       text="SET AS DELIVERED"
                       onClick={handleSetAsDelivered}
                       disabled={loadingAction}
-                    />
+                    /> 
                   ) : (
                     <DashboardButtonMain
                       text="COMPLETE PROJECT"
@@ -246,6 +263,13 @@ const ProjectCard = ({
                       disabled={loadingAction}
                     />
                   )}
+                  
+                  {status !== 'COMPLETED' && status !== 'CANCELLED' && (
+    <DashboardButtonSecondary 
+      text="CANCEL" 
+      onClick={handleCancelClick} 
+    />
+  )}
               <DashboardButtonSecondary text="DOWNLOAD" onClick={handleDownload} />
             </div>
           </div>
@@ -265,7 +289,6 @@ const ProjectCard = ({
         </div>
       </div>
 
-      {/* Cancel Reason Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg w-full max-w-md p-6 relative">
@@ -310,7 +333,6 @@ const ProjectCard = ({
         </div>
       )}
 
-      {/* 🔥 Global Loading Overlay */}
       {loadingAction && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>

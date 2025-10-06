@@ -56,10 +56,10 @@ const toTitleCase = (str) =>
         {cards.map((card, index) => (
           <div key={index} className="w-[340px]">
             <div className="flex items-center space-x-4">
-              <div>
-                <img src={card.logoUrl ? `${API_BASE_URL}/utility/uploads/${card.logoUrl}` : defaultFile} alt="default" className="h-25" />
+              <div className="w-25">
+                <img src={card.logoUrl ? `${API_BASE_URL}/utility/uploads/${card.logoUrl}` : defaultFile} alt="default" className="w-25" />
               </div>
-              <div className="text-2xl">{toTitleCase(card.projectName)}</div>
+              <div className="text-xl">{toTitleCase(card.projectName)}</div>
             </div>
             <div className="flex items-center justify-between mx-auto py-5">
               <div>

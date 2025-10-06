@@ -76,10 +76,10 @@ const Cards = ({ onCreateProjectClick }) => {
         {cards.map((card) => (
           <div key={card.id} className="w-[340px]">
             <div className="flex items-center space-x-4">
-              <div>
-                <img src={card.logoUrl} alt="template" className="h-25" />
+              <div className="w-25">
+                <img src={card.logoUrl} alt="template" className="w-25" />
               </div>
-              <div className="text-2xl">{card.title}</div>
+              <div className="text-xl">{card.title}</div>
             </div>
             <div className="flex items-center justify-between mx-auto py-5">
               <div>

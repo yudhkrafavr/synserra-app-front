@@ -23,16 +23,25 @@ const DashboardStatItem = ({ rank, title, value, projectCount, change, changeTyp
             </div>
           </div>
           <div className="flex space-x-2 items-center">
-            <div className={`text-md ${changeType === 'increase' ? 'text-[#396C4D]' : 'text-[#ED4E4E]'}`}>
-              {changeType === 'increase' ? '+' : '-'}${Math.abs(change)}
-            </div>
-            <div>
-              <img 
-                src={changeType === 'increase' ? arrowUp : arrowDown} 
-                alt={changeType === 'increase' ? 'arrow-up' : 'arrow-down'} 
-                className="h-2.5" 
-              />
-            </div>
+          {change != null && changeType != null && (
+  <div className="flex items-center space-x-1">
+    <div
+      className={`text-md ${
+        changeType === "increase" ? "text-[#396C4D]" : "text-[#ED4E4E]"
+      }`}
+    >
+      {changeType === "increase" ? "+" : "-"}${Math.abs(change)}
+    </div>
+    <div>
+      <img
+        src={changeType === "increase" ? arrowUp : arrowDown}
+        alt={changeType === "increase" ? "arrow-up" : "arrow-down"}
+        className="h-2.5"
+      />
+    </div>
+  </div>
+)}
+
           </div>
         </div>
       </div>

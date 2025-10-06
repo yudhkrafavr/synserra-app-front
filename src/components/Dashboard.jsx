@@ -47,17 +47,20 @@ const ProjectsPagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 export default function Dashboard() {
-  const [currentPage, setCurrentPage] = useState(1); // UI page starts at 1
-  const [activeTab, setActiveTab] = useState("PENDING"); // filter tab
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("PENDING");
   const [activePeriod, setActivePeriod] = useState("allTime");
 
   const [projects, setProjects] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const projectsPerPage = 3; // API size param
+  const [stats, setStats] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(true);
 
-  // 🔥 moved outside useEffect so ProjectCard can trigger it too
+  const projectsPerPage = 3;
+
+  // === Fetch Projects ===
   const fetchProjects = async () => {
     setLoading(true);
     try {
@@ -69,8 +72,7 @@ export default function Dashboard() {
       if (response.data.success) {
         const { content, totalPages } = response.data.data;
 
-        // Normalize API response
-        const formatted = content.map((p, index) => ({
+        const formatted = content.map((p) => ({
           id: p.projectId,
           code: p.projectCode,
           status: p.status,
@@ -92,51 +94,52 @@ export default function Dashboard() {
     }
   };
 
-  // Run on first render & when page/tab changes
+  // === Fetch Stats (Dynamic by Period) ===
+  const fetchStats = async (type) => {
+    setStatsLoading(true);
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/widget/performance?type=${type}`,
+        { headers: { accept: "*/*" } }
+      );
+
+      if (response.data.success) {
+        const formatted = response.data.data.map((item, index) => ({
+          id: index + 1,
+          title: item.templateName,
+          value: item.value,
+          projectCount: item.projectsCount,
+          change: item.change,
+          changeType: item.increased ? "increase" : "decrease",
+          logoUrl: item.logoUrl,
+        }));
+        setStats(formatted);
+      }
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      setStats([]);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // === Run when page/tab changes ===
   useEffect(() => {
     fetchProjects();
   }, [currentPage, activeTab]);
 
-  // Dummy stats (replace with API if available)
-  const allTimeStats = [
-    {
-      id: 1,
-      title: "Retails Co.",
-      value: "2415",
-      projectCount: 25,
-      change: "48",
-      changeType: "decrease",
-    },
-  ];
-
-  const weeklyStats = [
-    {
-      id: 1,
-      title: "Weekly Revenue",
-      value: "250",
-      projectCount: 8,
-      change: "12",
-      changeType: "increase",
-      description: "7-day revenue trend",
-    },
-  ];
-
-  const getCurrentStats = () => {
-    switch (activePeriod) {
-      case "week":
-        return weeklyStats;
-      case "month":
-        return []; // add monthly stats later
-      case "allTime":
-      default:
-        return allTimeStats;
-    }
-  };
+  // === Run when period changes ===
+  useEffect(() => {
+    let typeParam = "all-time";
+    if (activePeriod === "week") typeParam = "weekly";
+    else if (activePeriod === "month") typeParam = "monthly";
+    fetchStats(typeParam);
+  }, [activePeriod]);
 
   return (
     <div className="w-screen flex py-[1rem]">
       <div className="w-[1240px] flex space-x-7 mx-auto py-[2rem] min-w-[1100px] px-4">
-        {/* Left side - Projects */}
+        {/* === Left side - Projects === */}
         <div className="w-[60%]">
           <div>
             <h2 className="text-lg font-bold">Projects</h2>
@@ -205,9 +208,9 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right side - Stats */}
+        {/* === Right side - Templates Performance === */}
         <div className="w-[40%]">
-          <div className="w-[100%] border-b-1 border-[#DDDDDD]">
+          <div className="w-full border-b border-[#DDDDDD]">
             <h2 className="text-lg font-bold">Templates Performance</h2>
             <div className="my-6 text-[#B5B5B5]">
               <ul className="flex space-x-6 text-sm items-center">
@@ -229,7 +232,7 @@ export default function Dashboard() {
                   }`}
                   onClick={() => setActivePeriod("week")}
                 >
-                  This Week
+                  Last 7 Days
                 </li>
                 <li
                   className={`cursor-pointer ${
@@ -245,20 +248,28 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {getCurrentStats().map((stat, index) => (
-            <DashboardStatItem
-              key={stat.id}
-              rank={index + 1}
-              title={stat.title}
-              value={stat.value}
-              projectCount={stat.projectCount}
-              change={stat.change}
-              changeType={stat.changeType}
-              defaultFile={defaultFile}
-              arrowDown={arrowDown}
-              arrowUp={arrowUp}
-            />
-          ))}
+          {statsLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading stats...</div>
+          ) : stats.length > 0 ? (
+            stats.map((stat, index) => (
+              <DashboardStatItem
+                key={stat.id}
+                rank={index + 1}
+                title={stat.title}
+                value={stat.value}
+                projectCount={stat.projectCount}
+                change={stat.change}
+                changeType={stat.changeType}
+                defaultFile={defaultFile}
+                arrowDown={arrowDown}
+                arrowUp={arrowUp}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No stats available for this period.
+            </div>
+          )}
         </div>
       </div>
     </div>
