@@ -45,7 +45,7 @@ const Widget = () => {
             <div className="text-sm font-light py-4">Last week earnings today</div>
             <div className="flex space-x-3">
               <div className="text-xl">
-                <span className="text-[#396C4D]">${stats.lastWeekEarnings}</span> |
+                <span className="text-[#396C4D]">${stats.earningsDifference}</span> |
                 <span
                   className={
                     stats.earningsIncreased ? "text-[#396C4D]" : "text-[#ED4E4E]"
@@ -77,7 +77,7 @@ const Widget = () => {
             <div className="flex space-x-3">
               <div className="text-xl">
                 <span className="text-[#396C4D]">
-                  {stats.lastWeekJobsCompleted}
+                  {stats.jobsDifference}
                 </span>{" "}
                 |{" "}
                 <span

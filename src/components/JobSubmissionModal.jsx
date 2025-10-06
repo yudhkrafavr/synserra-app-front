@@ -63,7 +63,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
       console.log("Submission success:", response.data);
   
       if (onSubmit) {
-        onSubmit(response.data);
+        onSubmit(response.data.data);
       }
   
       onClose();

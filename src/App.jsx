@@ -18,6 +18,7 @@ function App() {
   const [isSubmissionModalOpen, setSubmissionModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [submittedProjectInfo, setSubmittedProjectInfo] = useState(null);
 
   // Function to open submission modal with selected card data
   const openSubmissionModal = (card) => {
@@ -43,10 +44,13 @@ function App() {
   const closeSubmissionModal = () => setSubmissionModalOpen(false);
   
   // Function to handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = (data) => {
+    // store API response from JobSubmissionModal
+    setSubmittedProjectInfo(data);
     closeSubmissionModal();
     setSuccessModalOpen(true);
   };
+  
   
   // Function to close success modal
   const closeSuccessModal = () => setSuccessModalOpen(false);
@@ -65,6 +69,7 @@ function App() {
         <JobSubmittedSuccess 
           isOpen={isSuccessModalOpen} 
           onClose={closeSuccessModal} 
+          projectInfo={submittedProjectInfo}
         />
         <div className="flex-grow">
           <Routes>

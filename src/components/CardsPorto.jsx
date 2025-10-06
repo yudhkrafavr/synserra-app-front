@@ -52,7 +52,7 @@ const toTitleCase = (str) =>
 
   return (
     <div className="w-screen flex flex-col items-center py-10 min-w-[1100px]">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[1240px] place-items-center px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-[1240px] items-start justify-items-center px-4">
         {cards.map((card, index) => (
           <div key={index} className="w-[340px]">
             <div className="flex items-center space-x-4">
@@ -73,7 +73,7 @@ const toTitleCase = (str) =>
             </div>
             <div className="bg-[#E4E4E4] p-7 shadow-sm">
               <img
-                src={`${API_BASE_URL}/utility/${card.logoUrl}`}
+                src={`${API_BASE_URL}/utility/uploads/${card.conceptUrl}`}
                 alt={card.projectName}
               />
             </div>

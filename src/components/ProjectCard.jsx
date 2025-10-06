@@ -198,7 +198,11 @@ const ProjectCard = ({
     <>
       <div className="flex space-x-5 p-6 border border-[#D9D9D9] w-[700px] rounded-[10px] my-5">
         <div className="w-[80px]">
-          <img src={`${UPLOADS_BASE_URL}${logoUrl}`} alt="defaultFile" className="w-[80px]" />
+        <img
+  src={logoUrl ? `${UPLOADS_BASE_URL}${logoUrl}` : defaultFile}
+  alt="logo"
+  className="w-[80px]"
+/>
         </div>
         <div className="flex justify-between w-[85%]">
           <div className="w-full">
