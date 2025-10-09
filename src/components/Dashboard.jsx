@@ -5,6 +5,7 @@ import DashboardStatItem from "./DashboardStatItem";
 import defaultFile from "../assets/file-template.svg";
 import arrowDown from "../assets/arrow-down.svg";
 import arrowUp from "../assets/arrow-up.svg";
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -58,14 +59,14 @@ export default function Dashboard() {
   const [stats, setStats] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
 
-  const projectsPerPage = 3;
+  const projectsPerPage = 5;
 
   // === Fetch Projects ===
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/project?page=${currentPage - 1}&size=${projectsPerPage}&status=${activeTab}`,
+      const response = await api.get(
+        `/project?page=${currentPage - 1}&size=${projectsPerPage}&status=${activeTab}`,
         { headers: { accept: "*/*" } }
       );
 
@@ -98,7 +99,7 @@ export default function Dashboard() {
   const fetchStats = async (type) => {
     setStatsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${API_BASE_URL}/widget/performance?type=${type}`,
         { headers: { accept: "*/*" } }
       );
@@ -137,7 +138,7 @@ export default function Dashboard() {
   }, [activePeriod]);
 
   return (
-    <div className="w-screen flex py-[1rem]">
+    <div className="w-screen flex py-[1rem] min-h-screen">
       <div className="w-[1240px] flex space-x-7 mx-auto py-[2rem] min-w-[1100px] px-4">
         {/* === Left side - Projects === */}
         <div className="w-[60%]">
@@ -175,6 +176,8 @@ export default function Dashboard() {
             </div>
           </div>
 
+          <div>
+
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading...</div>
           ) : projects.length > 0 ? (
@@ -198,7 +201,7 @@ export default function Dashboard() {
               No {activeTab.toLowerCase()} projects found.
             </div>
           )}
-
+          </div>
           {projects.length > 0 && (
             <ProjectsPagination
               currentPage={currentPage}

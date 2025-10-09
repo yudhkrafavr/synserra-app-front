@@ -5,6 +5,12 @@ import logo from "../assets/synserra-logo.svg";
 const Navbar = () => {
   const location = useLocation();
 
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "/login";
+  };
+
   return (
     <div className="w-full flex">
       <div className="w-[1240px] flex items-center justify-between mx-auto py-9 min-w-[1100px] px-4">
@@ -48,6 +54,11 @@ const Navbar = () => {
             </NavLink>
           </li>
         </ul>
+
+        <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-black">
+  Logout
+</button>
+
         
         <button 
           onClick={() => {

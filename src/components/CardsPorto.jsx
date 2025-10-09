@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import defaultFile from "../assets/file-template.svg";
 import CardButton from "./CardButton";
 import StarRating from "./StarRating";
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -23,7 +23,7 @@ const toTitleCase = (str) =>
 
   const loadCards = async () => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `${API_BASE_URL}/template/portfolio?page=${page}&size=${pageSize}`
       );
 

@@ -4,6 +4,7 @@ import defaultFile from "../assets/file-template.svg";
 import Levels from "./Levels";
 import LogoShape from "./LogoShape";
 import CardButton from "./CardButton";
+import api from "./api";
 
 const API_BASE_URL = 'http://localhost:8084';
 
@@ -13,48 +14,82 @@ const Cards = ({ onCreateProjectClick }) => {
   const [error, setError] = useState(null);
   const UPLOADS_BASE_URL = "http://localhost:8084/utility/uploads/";
 
+  // ✅ helper: use api with token to fetch secured file
+  const fetchSecureImage = async (filePath, fallbackUrl) => {
+    if (!filePath) return fallbackUrl;
+    try {
+      const response = await api.get(`/utility/uploads/${filePath}`, {
+        responseType: "blob",
+      });
+      return URL.createObjectURL(response.data);
+    } catch (err) {
+      console.warn("Failed to load secure image:", err);
+      return fallbackUrl;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        console.warn("No token found, redirecting to login");
+        window.location.href = "/login";
+        return;
+      }
+
       try {
-        const response = await axios.get(`${API_BASE_URL}/template/all`, {
-          headers: {
-            'accept': '*/*'
-          }
-        });
-  
+        const response = await api.get("/template/all");
+
         if (response.data.success && response.data.data) {
-          const formattedCards = response.data.data.map(card => {
-            const logoPath = card.lastVersion?.logoUrl;
-            const bannerPath = card.lastVersion?.mainBannerUrl;
-  
-            return {
-              id: card.templateId,
-              title: card.templateName,
-              estimatedValue: card.estimatedValue,
-              downloads: card.downloadCount,
-              imageUrl: bannerPath ? `${UPLOADS_BASE_URL}${bannerPath}` : "https://placehold.co/400x800",
-              logoUrl: logoPath ? `${UPLOADS_BASE_URL}${logoPath}` : defaultFile,
-              colorLevel: card.colorLevel,
-              logoShape: card.logoType?.toLowerCase(),
-              tags: card.tag ? card.tag.split(",").map(tag => tag.trim()).join(", ") : "",
-              industries: card.industries ? card.industries.split(",").map(industry => industry.trim()).join(", ") : "",
-              description: card.description,
-              lastVersion: card.lastVersion
-            };
-          });
-  
+          // Securely fetch each image with token
+          const formattedCards = await Promise.all(
+            response.data.data.map(async (card) => {
+              const logoPath = card.lastVersion?.logoUrl;
+              const bannerPath = card.lastVersion?.mainBannerUrl;
+
+              const imageUrl = await fetchSecureImage(
+                bannerPath,
+                "https://placehold.co/400x800"
+              );
+              const logoUrl = await fetchSecureImage(logoPath, defaultFile);
+
+              return {
+                id: card.templateId,
+                title: card.templateName,
+                estimatedValue: card.estimatedValue,
+                downloads: card.downloadCount,
+                imageUrl,
+                logoUrl,
+                colorLevel: card.colorLevel,
+                logoShape: card.logoType?.toLowerCase(),
+                tags: card.tag
+                  ? card.tag.split(",").map((tag) => tag.trim()).join(", ")
+                  : "",
+                industries: card.industries
+                  ? card.industries
+                      .split(",")
+                      .map((industry) => industry.trim())
+                      .join(", ")
+                  : "",
+                description: card.description,
+                lastVersion: card.lastVersion,
+              };
+            })
+          );
+
           setCards(formattedCards);
         } else {
-          throw new Error("Invalid response format from server");
+          setError("Invalid response data");
         }
       } catch (err) {
-        console.error("Error fetching data: ", err);
-        setError(err.message);
+        console.error("Error fetching templates:", err);
+        setError("Failed to load templates");
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 

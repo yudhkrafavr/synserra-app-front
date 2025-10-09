@@ -6,6 +6,7 @@ import DashboardButtonMain from './DashboardButtonMain';
 import DashboardButtonSecondary from './DashboardButtonSecondary';
 import defaultFile from "../assets/file-template.svg";
 import ProjectDetails from './ProjectDetails';
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -56,8 +57,8 @@ const ProjectCard = ({
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await axios.post(
-      `${API_BASE_URL}/utility/upload`,
+    const response = await api.post(
+      `/utility/upload`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -74,14 +75,27 @@ const ProjectCard = ({
       alert("No template available to download.");
       return;
     }
-
+  
     try {
       setLoadingAction(true);
-
-      const downloadUrl = `${API_BASE_URL}/utility/${templateUrl}.zip`;
-      window.open(downloadUrl, "_blank");
-
-      // Give backend a moment to update
+  
+      // 🔥 Use axios instance with auth + refresh
+      const response = await api.get(`/utility/${templateUrl}.zip`, {
+        responseType: "blob", // 🔑 ensures file data is treated as binary
+      });
+  
+      // 🧠 Create a temporary link to trigger download
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${templateUrl}.zip`; // sets proper filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+  
+      // ✅ Give backend time to update UI
       if (onReload) {
         setTimeout(() => {
           onReload();
@@ -93,16 +107,17 @@ const ProjectCard = ({
     } catch (err) {
       console.error("Download failed:", err);
       setLoadingAction(false);
+      alert("Failed to download template. Please try again.");
     }
   };
-
+  
   const handleCancelSubmit = async () => {
     if (!cancelReason.trim()) return;
 
     try {
       setLoadingAction(true);
 
-      const response = await axios.post(
+      const response = await api.post(
         `${API_BASE_URL}/project/cancel`,
         {
           projectId: id,          // 👈 use id prop from ProjectCard
@@ -136,7 +151,7 @@ const ProjectCard = ({
     try {
       setLoadingAction(true);
   
-      const response = await axios.post(
+      const response = await api.post(
         `${API_BASE_URL}/project/setDelivered`,
         {
           projectId: id,   // <- use the id prop
@@ -177,7 +192,7 @@ const ProjectCard = ({
       console.log("Submitting completion payload:", payload);
 
       // 3. Submit completion
-      const response = await axios.post(
+      const response = await api.post(
         `${API_BASE_URL}/project/completion`,
         payload,
         { headers: { "Content-Type": "application/json" } }

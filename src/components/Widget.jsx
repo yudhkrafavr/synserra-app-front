@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import arrowDown from "../assets/arrow-down.svg";
 import arrowUp from "../assets/arrow-up.svg";
 import axios from "axios";
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -10,13 +11,23 @@ const Widget = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.warn("No token found, user may not be logged in");
+        return;
+      }
       try {
-        const response = await axios.get(`${API_BASE_URL}/widget/weeklyStats`);
-        if (response.data.success) {
-          setStats(response.data.data);
-        }
+        const response = await api.get("/widget/weeklyStats");
+        setStats(response.data.data);
       } catch (error) {
         console.error("Error fetching weekly stats:", error);
+
+        // 🟢 Optional: Auto logout if token is invalid/expired
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
       }
     };
 

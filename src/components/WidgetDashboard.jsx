@@ -5,6 +5,7 @@ import arrowUp from "../assets/arrow-up.svg";
 import time from "../assets/time.svg";
 import timePending from "../assets/time-pending.svg";
 import graph from "../assets/graph.svg";
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -12,14 +13,28 @@ const WidgetDashboard = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/widget/earningsStats`)
-      .then((res) => {
-        if (res.data.success) {
-          setStats(res.data.data);
+    const fetchStats = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.warn("No token found, user may not be logged in");
+        return;
+      }
+      try {
+        const response = await api.get("/widget/earningsStats");
+        setStats(response.data.data);
+      } catch (error) {
+        console.error("Error fetching weekly stats:", error);
+
+        // 🟢 Optional: Auto logout if token is invalid/expired
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
         }
-      })
-      .catch((err) => console.error("Error fetching earnings stats:", err));
+      }
+    };
+
+    fetchStats();
   }, []);
 
   if (!stats) {

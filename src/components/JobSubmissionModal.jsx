@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import catSubmission from "../assets/cat-submission.png";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "./api";
 
 
 const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, templateId }) => {
@@ -53,7 +54,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
     };
   
     try {
-      const response = await axios.post(`${API_BASE_URL}/project/submit`, payload, {
+      const response = await api.post(`/project/submit`, payload, {
         headers: {
           "Content-Type": "application/json",
           accept: "*/*"

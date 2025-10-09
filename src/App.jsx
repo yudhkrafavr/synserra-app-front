@@ -13,6 +13,8 @@ import JobSubmittedSuccess from "./components/JobSubmittedSuccess";
 import Dashboard from "./components/Dashboard";
 import CardsPorto from "./components/CardsPorto";
 import WidgetPortfolio from "./components/WidgetPortfolio";
+import LoginPage from "./components/LoginPage";
+import PrivateRoute from "./components/PrivateRoute"; // 🟢 added
 
 function App() {
   const [isSubmissionModalOpen, setSubmissionModalOpen] = useState(false);
@@ -20,82 +22,98 @@ function App() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [submittedProjectInfo, setSubmittedProjectInfo] = useState(null);
 
-  // Function to open submission modal with selected card data
   const openSubmissionModal = (card) => {
     setSelectedCard(card);
     setSubmissionModalOpen(true);
   };
 
-  // Handle custom template submission from navbar
   useEffect(() => {
     const handleCustomWorkClick = (event) => {
-      setSelectedCard({
-        title: event.detail.templateTitle
-      });
+      setSelectedCard({ title: event.detail.templateTitle });
       setSubmissionModalOpen(true);
     };
 
-    window.addEventListener('openJobSubmissionModal', handleCustomWorkClick);
+    window.addEventListener("openJobSubmissionModal", handleCustomWorkClick);
     return () => {
-      window.removeEventListener('openJobSubmissionModal', handleCustomWorkClick);
+      window.removeEventListener("openJobSubmissionModal", handleCustomWorkClick);
     };
   }, []);
-  // Function to close submission modal
+
   const closeSubmissionModal = () => setSubmissionModalOpen(false);
-  
-  // Function to handle form submission
+
   const handleSubmit = (data) => {
-    // store API response from JobSubmissionModal
     setSubmittedProjectInfo(data);
     closeSubmissionModal();
     setSuccessModalOpen(true);
   };
-  
-  
-  // Function to close success modal
+
   const closeSuccessModal = () => setSuccessModalOpen(false);
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <JobSubmissionModal 
-          isOpen={isSubmissionModalOpen} 
-          onClose={closeSubmissionModal} 
+      <div className="flex flex-col min-h-screen">
+        {/* 🟢 Move Navbar inside protected route only */}
+        <Routes>
+          {/* 🟢 Public route */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* 🟢 Protected routes */}
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <Widget />
+                  <HeadingTitle headingTitle="Pick your today’s template" />
+                  <Cards onCreateProjectClick={openSubmissionModal} />
+                  <Footer />
+                </>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <WidgetDashboard />
+                  <Dashboard onCreateProjectClick={openSubmissionModal} />
+                  <Footer />
+                </>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/portfolio"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <WidgetPortfolio />
+                  <HeadingTitle headingTitle="Our Recent Works" />
+                  <CardsPorto />
+                  <Footer />
+                </>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+
+        {/* 🟢 Modals are outside router context so they always work */}
+        <JobSubmissionModal
+          isOpen={isSubmissionModalOpen}
+          onClose={closeSubmissionModal}
           onSubmit={handleSubmit}
           templateTitle={selectedCard?.title}
           templateId={selectedCard?.id}
-        />  
-        <JobSubmittedSuccess 
-          isOpen={isSuccessModalOpen} 
-          onClose={closeSuccessModal} 
+        />
+        <JobSubmittedSuccess
+          isOpen={isSuccessModalOpen}
+          onClose={closeSuccessModal}
           projectInfo={submittedProjectInfo}
         />
-        <div className="flex-grow">
-          <Routes>
-            <Route path="/" element={
-              <>
-              <Widget />
-              <HeadingTitle headingTitle="Pick your today’s template" />
-              <Cards onCreateProjectClick={openSubmissionModal} />
-              </>
-            } />
-            <Route path="/dashboard" element={
-              <>
-                <WidgetDashboard />
-                <Dashboard onCreateProjectClick={openSubmissionModal} />
-              </>
-            } />
-            <Route path="/portfolio" element={
-              <>
-              <WidgetPortfolio />
-              <HeadingTitle headingTitle="Our Recent Works" />
-              <CardsPorto />
-              </>
-            } />
-          </Routes>
-        </div>
-        <Footer />
       </div>
     </Router>
   );

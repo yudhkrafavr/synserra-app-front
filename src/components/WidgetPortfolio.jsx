@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import api from "./api";
 
 const API_BASE_URL = "http://localhost:8084";
 
@@ -7,14 +8,28 @@ const WidgetPortfolio = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/widget/portfolioStats`)
-      .then((res) => {
-        if (res.data.success) {
-          setStats(res.data.data);
+    const fetchStats = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.warn("No token found, user may not be logged in");
+        return;
+      }
+      try {
+        const response = await api.get("/widget/portfolioStats");
+        setStats(response.data.data);
+      } catch (error) {
+        console.error("Error fetching weekly stats:", error);
+
+        // 🟢 Optional: Auto logout if token is invalid/expired
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
         }
-      })
-      .catch((err) => console.error("Error fetching portfolio stats:", err));
+      }
+    };
+
+    fetchStats();
   }, []);
 
   if (!stats) {
