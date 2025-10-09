@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import logo from "../assets/synserra-logo.svg";
+import { LogOut } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
@@ -55,9 +56,7 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-black">
-  Logout
-</button>
+       
 
         
         <button 
@@ -74,6 +73,13 @@ const Navbar = () => {
           className="bg-[#302E2C] hover:bg-[#535353] text-white px-4 py-2 rounded-sm text-sm transition-colors"
         >
           Submit Custom Work
+        </button>
+        <button
+          onClick={handleLogout}
+          className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+          title="Logout"
+        >
+          <LogOut size={20} className="text-gray-600 hover:text-black" />
         </button>
         </div>
       </div>

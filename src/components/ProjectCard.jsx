@@ -269,19 +269,22 @@ const ProjectCard = ({
               </div>
             )}
             <div className="flex items-center space-x-1 pt-4">
-            {status === 'PENDING' || status === 'IN_PROGRESS' ? (
-                    <DashboardButtonMain
-                      text="SET AS DELIVERED"
-                      onClick={handleSetAsDelivered}
-                      disabled={loadingAction}
-                    /> 
-                  ) : (
-                    <DashboardButtonMain
-                      text="COMPLETE PROJECT"
-                      onClick={handleCompleteProject}
-                      disabled={loadingAction}
-                    />
-                  )}
+            {status !== 'COMPLETED' && (
+  (status === 'PENDING' || status === 'IN_PROGRESS') ? (
+    <DashboardButtonMain
+      text="SET AS DELIVERED"
+      onClick={handleSetAsDelivered}
+      disabled={loadingAction}
+    />
+  ) : (
+    <DashboardButtonMain
+      text="COMPLETE PROJECT"
+      onClick={handleCompleteProject}
+      disabled={loadingAction}
+    />
+  )
+)}
+
                   
                   {status !== 'COMPLETED' && status !== 'CANCELLED' && (
     <DashboardButtonSecondary 
