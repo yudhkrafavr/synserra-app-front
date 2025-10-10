@@ -2,14 +2,16 @@ import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import logo from "../assets/synserra-logo.svg";
 import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
