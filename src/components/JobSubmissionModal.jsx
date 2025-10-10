@@ -17,7 +17,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
   const [otherSource, setOtherSource] = useState('');
   const today = new Date().toISOString().split('T')[0];
   const [addToPortfolio, setAddToPortfolio] = useState('no'); 
-  const API_BASE_URL = "http://localhost:8084";
+  const API_BASE_URL = "https://api.upilabs.com";
   
   const getRelativeDate = (dateString) => {
     if (!dateString) return '';

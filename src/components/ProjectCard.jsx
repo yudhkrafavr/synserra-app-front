@@ -8,7 +8,7 @@ import defaultFile from "../assets/file-template.svg";
 import ProjectDetails from './ProjectDetails';
 import api from "./api";
 
-const API_BASE_URL = "http://localhost:8084";
+const API_BASE_URL = "https://api.upilabs.com";
 
 const formatRemainingDays = (targetDate) => {
   if (!targetDate) return 'No due date';
@@ -48,7 +48,7 @@ const ProjectCard = ({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [loadingAction, setLoadingAction] = useState(false);
-  const UPLOADS_BASE_URL = "http://localhost:8084/utility/uploads/";
+  const UPLOADS_BASE_URL = "https://api.upilabs.com/utility/uploads/";
 
   // helper: upload file -> return uploaded fileId
   const uploadFile = async (file) => {
@@ -193,7 +193,7 @@ const ProjectCard = ({
 
       // 3. Submit completion
       const response = await api.post(
-        `${API_BASE_URL}/project/completion`,
+        `/project/completion`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );

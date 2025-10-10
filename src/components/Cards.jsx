@@ -6,13 +6,13 @@ import LogoShape from "./LogoShape";
 import CardButton from "./CardButton";
 import api from "./api";
 
-const API_BASE_URL = 'http://localhost:8084';
+const API_BASE_URL = 'https://api.upilabs.com';
 
 const Cards = ({ onCreateProjectClick }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const UPLOADS_BASE_URL = "http://localhost:8084/utility/uploads/";
+  const UPLOADS_BASE_URL = "https://api.upilabs.com/utility/uploads/";
 
   // ✅ helper: use api with token to fetch secured file
   const fetchSecureImage = async (filePath, fallbackUrl) => {

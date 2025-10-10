@@ -7,7 +7,7 @@ import arrowDown from "../assets/arrow-down.svg";
 import arrowUp from "../assets/arrow-up.svg";
 import api from "./api";
 
-const API_BASE_URL = "http://localhost:8084";
+const API_BASE_URL = "https://api.upilabs.com";
 
 const ProjectsPagination = ({ currentPage, totalPages, onPageChange }) => {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);

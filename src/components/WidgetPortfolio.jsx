@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import api from "./api";
 
-const API_BASE_URL = "http://localhost:8084";
+const API_BASE_URL = "https://api.upilabs.com";
 
 const WidgetPortfolio = () => {
   const [stats, setStats] = useState(null);

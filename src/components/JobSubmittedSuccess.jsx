@@ -79,7 +79,7 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
 
           {/* Download Button */}
           <a
-            href={projectData ? `http://localhost:8084/utility/${projectData}.zip` : "#"}
+            href={projectData ? `https://api.upilabs.com/utility/${projectData}.zip` : "#"}
             className="font-semibold text-sm bg-[#FE9D2B] px-5 py-2 rounded border border-[#121212] hover:bg-[#e88f27] transition-colors inline-block"
           >
             DOWNLOAD

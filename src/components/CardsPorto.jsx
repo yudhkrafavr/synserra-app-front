@@ -4,7 +4,7 @@ import CardButton from "./CardButton";
 import StarRating from "./StarRating";
 import api from "./api";
 
-const API_BASE_URL = "http://localhost:8084";
+const API_BASE_URL = "https://api.upilabs.com";
 
 const CardsPorto = () => {
   const [cards, setCards] = useState([]);

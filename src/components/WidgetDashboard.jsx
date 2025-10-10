@@ -7,7 +7,7 @@ import timePending from "../assets/time-pending.svg";
 import graph from "../assets/graph.svg";
 import api from "./api";
 
-const API_BASE_URL = "http://localhost:8084";
+const API_BASE_URL = "https://api.upilabs.com";
 
 const WidgetDashboard = () => {
   const [stats, setStats] = useState(null);
