@@ -9,6 +9,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    alert("Are you sure you want to logout?");
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     navigate("/login");

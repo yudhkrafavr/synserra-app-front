@@ -1,11 +1,36 @@
 import React, { useMemo } from 'react';
 import { Check, X } from 'lucide-react';
 import catSubmitted from "../assets/cat-submitted.png";
+import api from "./api";
 
 const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
   const { projectName, dueDate, projectData } = projectInfo || {};
+  const [downloading, setDownloading] = React.useState(false);
 
   if (!isOpen) return null;
+
+  const handleSecureDownload = async () => {
+    if (!projectData) return;
+    setDownloading(true);
+    try {
+      const response = await api.get(`/utility/${projectData}.zip`, { responseType: "blob" });
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadableFile || "download.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+  
 
   // 🧮 Calculate remaining time until end of dueDate (23:59:00)
   const remainingTime = useMemo(() => {
@@ -78,12 +103,15 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
           </div>
 
           {/* Download Button */}
-          <a
-            href={projectData ? `https://api.upilabs.com/utility/${projectData}.zip` : "#"}
-            className="font-semibold text-sm bg-[#FE9D2B] px-5 py-2 rounded border border-[#121212] hover:bg-[#e88f27] transition-colors inline-block"
-          >
-            DOWNLOAD
-          </a>
+          <button
+  onClick={handleSecureDownload}
+  disabled={downloading}
+  className={`font-semibold text-sm px-5 py-2 rounded border border-[#121212] transition-colors inline-block
+    ${downloading ? "bg-gray-400 cursor-not-allowed" : "bg-[#FE9D2B] hover:bg-[#e88f27]"}`}
+>
+  {downloading ? "DOWNLOADING..." : "DOWNLOAD"}
+</button>
+
         </div>
 
         {/* Close Button */}
