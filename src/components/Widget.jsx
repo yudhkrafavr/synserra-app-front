@@ -11,23 +11,11 @@ const Widget = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.warn("No token found, user may not be logged in");
-        return;
-      }
       try {
         const response = await api.get("/widget/weeklyStats");
         setStats(response.data.data);
       } catch (error) {
         console.error("Error fetching weekly stats:", error);
-
-        // 🟢 Optional: Auto logout if token is invalid/expired
-        if (error.response?.status === 401) {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-        }
       }
     };
 

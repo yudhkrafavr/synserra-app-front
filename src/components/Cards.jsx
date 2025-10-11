@@ -30,14 +30,6 @@ const Cards = ({ onCreateProjectClick }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("access_token");
-
-      if (!token) {
-        console.warn("No token found, redirecting to login");
-        window.location.href = "/login";
-        return;
-      }
-
       try {
         const response = await api.get("/template/all");
 
