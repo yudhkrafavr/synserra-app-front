@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Check, X } from 'lucide-react';
+import React, { useMemo } from "react";
+import { Check, X } from "lucide-react";
 import catSubmitted from "../assets/cat-submitted.png";
 import api from "./api";
 
@@ -9,11 +9,23 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
 
   if (!isOpen) return null;
 
+  // 🧩 Extract file name (without folder)
+  const downloadableFile = useMemo(() => {
+    if (!projectData) return "-";
+    const parts = projectData.split("/");
+    return parts.pop();
+  }, [projectData]);
+
+  // 🧩 Secure file download using token + refresh
   const handleSecureDownload = async () => {
     if (!projectData) return;
     setDownloading(true);
+
     try {
-      const response = await api.get(`/utility/${projectData}.zip`, { responseType: "blob" });
+      const response = await api.get(`/utility/${projectData}.zip`, {
+        responseType: "blob",
+      });
+
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -30,7 +42,6 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
       setDownloading(false);
     }
   };
-  
 
   // 🧮 Calculate remaining time until end of dueDate (23:59:00)
   const remainingTime = useMemo(() => {
@@ -38,8 +49,6 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
 
     const now = new Date();
     const endOfDueDate = new Date(dueDate);
-
-    // Set due date time to 23:59:00
     endOfDueDate.setHours(23, 59, 0, 0);
 
     const diffMs = endOfDueDate - now;
@@ -51,15 +60,6 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
 
     return `${days} Days ${hours} Hours ${minutes} Minutes`;
   }, [dueDate]);
-
-  // 🧩 Extract file name without "projects/" and ".zip"
-  const downloadableFile = useMemo(() => {
-    if (!projectData) return "-";
-
-    // Example: "projects/8x1q_FIVERR_BUJA_RETAILS_CO_02102025.zip"
-    const parts = projectData.split("/");
-    return parts.pop(); // "8x1q_FIVERR_BUJA_RETAILS_CO_02102025.zip"
-  }, [projectData]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -86,32 +86,51 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
           <div className="w-[550px] border border-[#B5B5B5] p-4 mx-auto my-5 text-left">
             <div className="table">
               <div className="table-row h-6">
-                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">Project Name</div>
-                <div className="table-cell w-[60%] text-sm align-middle">{projectName || "-"}</div>
+                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">
+                  Project Name
+                </div>
+                <div className="table-cell w-[60%] text-sm align-middle">
+                  {projectName || "-"}
+                </div>
               </div>
 
               <div className="table-row h-6">
-                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">Due in</div>
-                <div className="table-cell w-[60%] text-sm font-bold align-middle">{remainingTime || "-"}</div>
+                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">
+                  Due in
+                </div>
+                <div className="table-cell w-[60%] text-sm font-bold align-middle">
+                  {remainingTime || "-"}
+                </div>
               </div>
 
               <div className="table-row h-6">
-                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">Downloadable file</div>
-                <div className="table-cell w-[60%] text-sm align-middle">{downloadableFile || "-"}</div>
+                <div className="table-cell w-[40%] text-[#5B5B5B] text-sm align-middle">
+                  Downloadable file
+                </div>
+                <div className="table-cell w-[60%] text-sm align-middle">
+                  {downloadableFile || "-"}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Download Button */}
+          {/* 🔒 Download Button */}
           <button
-  onClick={handleSecureDownload}
-  disabled={downloading}
-  className={`font-semibold text-sm px-5 py-2 rounded border border-[#121212] transition-colors inline-block
-    ${downloading ? "bg-gray-400 cursor-not-allowed" : "bg-[#FE9D2B] hover:bg-[#e88f27]"}`}
->
-  {downloading ? "DOWNLOADING..." : "DOWNLOAD"}
-</button>
-
+            onClick={handleSecureDownload}
+            disabled={downloading || !projectData}
+            className={`font-semibold text-sm px-5 py-2 rounded border border-[#121212] transition-colors inline-block
+              ${
+                downloading || !projectData
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#FE9D2B] hover:bg-[#e88f27]"
+              }`}
+          >
+            {downloading
+              ? "DOWNLOADING..."
+              : projectData
+              ? "DOWNLOAD"
+              : "NO FILE AVAILABLE"}
+          </button>
         </div>
 
         {/* Close Button */}
