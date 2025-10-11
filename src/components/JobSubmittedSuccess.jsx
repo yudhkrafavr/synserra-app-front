@@ -1,13 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Check, X } from "lucide-react";
 import catSubmitted from "../assets/cat-submitted.png";
 import api from "./api";
 
 const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
   const { projectName, dueDate, projectData } = projectInfo || {};
-  const [downloading, setDownloading] = React.useState(false);
-
-  if (!isOpen) return null;
+  const [downloading, setDownloading] = useState(false);
 
   // 🧩 Extract file name (without folder)
   const downloadableFile = useMemo(() => {
@@ -25,16 +23,23 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
       const response = await api.get(`/utility/${projectData}.zip`, {
         responseType: "blob",
       });
-
-      const blob = new Blob([response.data]);
+      
+      const blob = new Blob([response.data], { type: "application/zip" });
       const url = window.URL.createObjectURL(blob);
+      
+      let fileName = downloadableFile || "download.zip";
+      if (!fileName.toLowerCase().endsWith(".zip")) {
+        fileName = fileName + ".zip";
+      }
+      
       const a = document.createElement("a");
       a.href = url;
-      a.download = downloadableFile || "download.zip";
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      
     } catch (error) {
       console.error("Download failed:", error);
       alert("Failed to download file.");
@@ -46,20 +51,19 @@ const JobSubmittedSuccess = ({ isOpen, onClose, projectInfo }) => {
   // 🧮 Calculate remaining time until end of dueDate (23:59:00)
   const remainingTime = useMemo(() => {
     if (!dueDate) return "-";
-
     const now = new Date();
     const endOfDueDate = new Date(dueDate);
     endOfDueDate.setHours(23, 59, 0, 0);
-
     const diffMs = endOfDueDate - now;
     if (diffMs <= 0) return "Expired";
-
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
-
     return `${days} Days ${hours} Hours ${minutes} Minutes`;
   }, [dueDate]);
+
+  // 🧱 Instead of returning early, render nothing
+  if (!isOpen) return <></>;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
