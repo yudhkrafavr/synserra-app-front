@@ -9,11 +9,14 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    alert("Are you sure you want to logout?");
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (!confirmed) return; // user clicked "Cancel"
+    
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     navigate("/login");
   };
+  
 
   return (
     <div className="w-full flex">

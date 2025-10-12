@@ -70,6 +70,47 @@ const ProjectCard = ({
     setShowCancelModal(true);
   };
 
+  const handleDownloadComplete = async () => {
+    if (!templateUrl) {
+      alert("No template available to download.");
+      return;
+    }
+  
+    try {
+      setLoadingAction(true);
+  
+      // 🔥 Use axios instance with auth + refresh
+      const response = await api.get(`/utility/${templateUrl}.zip`, {
+        responseType: "blob", // 🔑 ensures file data is treated as binary
+      });
+  
+      // 🧠 Create a temporary link to trigger download
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${templateUrl}.zip`; // sets proper filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+  
+      // ✅ Give backend time to update UI
+      if (onReload) {
+        setTimeout(() => {
+          onReload();
+          setLoadingAction(false);
+        }, 1000);
+      } else {
+        setTimeout(() => setLoadingAction(false), 1500);
+      }
+    } catch (err) {
+      console.error("Download failed:", err);
+      setLoadingAction(false);
+      alert("Failed to download template. Please try again.");
+    }
+  };
+
   const handleDownload = async () => {
     if (!templateUrl) {
       alert("No template available to download.");
@@ -292,7 +333,11 @@ const ProjectCard = ({
       onClick={handleCancelClick} 
     />
   )}
-              <DashboardButtonSecondary text="DOWNLOAD" onClick={handleDownload} />
+              <DashboardButtonSecondary
+  text="DOWNLOAD"
+  onClick={status === "COMPLETED" ? handleDownloadComplete : handleDownload}
+/>
+
             </div>
           </div>
           <div>
