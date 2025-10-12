@@ -41,7 +41,8 @@ const ProjectCard = ({
   logoUrl,
   onReload,
   templateUrl,
-  createdDate
+  createdDate,
+  deliverableFile
 }) => {
   const [details, setDetails] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
@@ -71,7 +72,7 @@ const ProjectCard = ({
   };
 
   const handleDownloadComplete = async () => {
-    if (!templateUrl) {
+    if (!templateUrl && !deliverableFile) {
       alert("No template available to download.");
       return;
     }
@@ -80,7 +81,7 @@ const ProjectCard = ({
       setLoadingAction(true);
   
       // 🔥 Use axios instance with auth + refresh
-      const response = await api.get(`/utility/${templateUrl}.zip`, {
+      const response = await api.get(`/utility/fulfilled/${deliverableFile}`, {
         responseType: "blob", // 🔑 ensures file data is treated as binary
       });
   
@@ -89,7 +90,7 @@ const ProjectCard = ({
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `${templateUrl}.zip`; // sets proper filename
+      link.download = deliverableFile; // sets proper filename
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -252,7 +253,13 @@ const ProjectCard = ({
 
   return (
     <>
-      <div className="flex space-x-5 p-6 border border-[#D9D9D9] w-[700px] rounded-[10px] my-5">
+      <div className="relative flex space-x-5 p-6 border border-[#D9D9D9] w-[700px] rounded-[10px] my-5">
+      {loadingAction && (
+  <div className="absolute inset-0 bg-white/70 backdrop-blur-[7px] flex items-center justify-center rounded-[10px] z-10">
+    <div className="w-8 h-8 border-4 border-[#FE9D2B] border-t-transparent rounded-full animate-spin"></div>
+  </div>
+)}
+
         <div className="w-[80px]">
         <img
   src={logoUrl ? `${UPLOADS_BASE_URL}${logoUrl}` : defaultFile}
@@ -333,10 +340,14 @@ const ProjectCard = ({
       onClick={handleCancelClick} 
     />
   )}
-              <DashboardButtonSecondary
-  text="DOWNLOAD"
-  onClick={status === "COMPLETED" ? handleDownloadComplete : handleDownload}
-/>
+{(status !== 'COMPLETED' || (status === 'COMPLETED' && deliverableFile)) && (
+  <DashboardButtonSecondary
+    text="DOWNLOAD"
+    onClick={status === "COMPLETED" ? handleDownloadComplete : handleDownload}
+  />
+)}
+
+
 
             </div>
           </div>
@@ -400,11 +411,6 @@ const ProjectCard = ({
         </div>
       )}
 
-      {loadingAction && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
     </>
   );
 };

@@ -83,6 +83,7 @@ export default function Dashboard() {
           createdDate: p.createdDate,
           price: p.value,
           logoUrl: p.logoUrl,
+          deliverableFile: p.deliverableFile,
         }));
 
         setProjects(formatted);
@@ -194,6 +195,7 @@ export default function Dashboard() {
                 onReload={fetchProjects}
                 templateUrl={project.templateUrl}
                 createdDate={project.createdDate}
+                deliverableFile={project.deliverableFile}
               />
             ))
           ) : (

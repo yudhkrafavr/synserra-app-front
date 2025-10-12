@@ -17,6 +17,8 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
   const [otherSource, setOtherSource] = useState('');
   const today = new Date().toISOString().split('T')[0];
   const [addToPortfolio, setAddToPortfolio] = useState('no'); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const API_BASE_URL = "https://api.upilabs.com";
   
   const getRelativeDate = (dateString) => {
@@ -39,7 +41,8 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setIsSubmitting(true);  
+    
     const payload = {
       projectValue: parseInt(projectValue) || 0,
       templateName: templateTitle || "Untitled Template",
@@ -71,11 +74,14 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
     } catch (err) {
       console.error("Error submitting project:", err);
       alert("Failed to submit project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };  
 
   // Reset form fields
   const handleReset = () => {
+    if (isSubmitting) return;
     setProjectValue('5');
     setClientName('');
     setEstimatedDeliveryDate('');
@@ -123,6 +129,15 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
           />
         </div>
         <div className="w-[55%] p-7">
+        {isSubmitting && (
+  <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 rounded">
+    <div className="flex flex-col items-center">
+      <div className="w-8 h-8 border-4 border-[#FE9D2B] border-t-transparent rounded-full animate-spin mb-2"></div>
+      <p className="text-gray-700 font-medium text-sm">Submitting...</p>
+    </div>
+  </div>
+)}
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold text-gray-800">
               {templateTitle ? `${templateTitle} Template Job Submission` : 'Template Job Submission'}
@@ -135,7 +150,7 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
               <X className="w-6 h-6" />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className={`space-y-4 ${isSubmitting ? "pointer-events-none opacity-60" : ""}`}>
           <label htmlFor="projectValue" className="text-sm text-gray-500">
               Project value
             </label>
@@ -415,20 +430,26 @@ const JobSubmissionModal = ({ isOpen, onClose, onSubmit, templateTitle, template
             </div>
             {/* Buttons */}
             <div className="flex space-x-3 pt-2">
-              <button
-                type="submit"
-                className="font-semibold text-sm bg-[#FE9D2B] px-5 py-2 rounded border-1 border-[#121212] hover:bg-[#e88f27] transition-colors"
-              >
-                SUBMIT
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="font-semibold text-sm bg-gray-300 text-black px-5 py-2 rounded border-1 border-[#121212]"
-              >
-                RESET
-              </button>
-            </div>
+  <button
+    type="submit"
+    disabled={isSubmitting}
+    className={`font-semibold text-sm bg-[#FE9D2B] px-5 py-2 rounded border-1 border-[#121212] hover:bg-[#e88f27] transition-colors ${
+      isSubmitting ? "bg-gray-400 text-white cursor-not-allowed" : ""
+    }`}
+  >
+    {isSubmitting ? "Submitting..." : "SUBMIT"}
+  </button>
+
+  <button
+    type="button"
+    onClick={handleReset}
+    disabled={isSubmitting}
+    className="font-semibold text-sm bg-gray-300 text-black px-5 py-2 rounded border-1 border-[#121212]"
+  >
+    RESET
+  </button>
+</div>
+
           </form>
         </div>
           </motion.div>

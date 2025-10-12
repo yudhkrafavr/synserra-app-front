@@ -14,6 +14,7 @@ const Widget = () => {
       try {
         const response = await api.get("/widget/weeklyStats");
         setStats(response.data.data);
+        console.log(response.data.data);
       } catch (error) {
         console.error("Error fetching weekly stats:", error);
       }
@@ -33,7 +34,7 @@ const Widget = () => {
   }
 
   return (
-    <div className="w-screen flex py-[2rem] bg-[#F9FAE3]">
+    <div className="w-screen flex py-[2rem] bg-[#F9FAE3] min-w-[1100px]">
       <div className="w-[1240px] flex items-center justify-between mx-auto py-[2rem] min-w-[1100px] px-4">
         <div className="text-3xl">Current week’s stats</div>
         <div className="flex space-x-10">

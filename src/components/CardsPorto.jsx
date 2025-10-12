@@ -36,29 +36,42 @@ const CardsPorto = () => {
   };
 
   // ✅ Secure download handler
-  const handleSecureDownload = async (filePath, filename = "file.zip") => {
+  const handleSecureDownload = async (filePath) => {
     if (!filePath) {
       alert("No file available to download.");
       return;
     }
+  
     try {
-      const response = await api.get(`/utility/${filePath}`, {
-        responseType: "blob",
+      // Optional: show a small per-card spinner
+      setLoading(true);
+  
+      // ✅ Match same logic as handleDownloadComplete
+      const response = await api.get(`/utility/fulfilled/${filePath}`, {
+        responseType: "blob", // treat as binary
       });
-      const blobUrl = URL.createObjectURL(response.data);
-
+  
+      // 🧠 Create a temporary blob URL
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+  
       const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = filename;
+      link.href = downloadUrl;
+      link.download = filePath; // e.g. projectName.zip
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+  
+      // Optional delay for smoother UX
+      setTimeout(() => setLoading(false), 800);
     } catch (err) {
       console.error("Download failed:", err);
+      setLoading(false);
       alert("Failed to download file. Please try again.");
     }
   };
+  
 
   const loadCards = async () => {
     try {
@@ -66,11 +79,10 @@ const CardsPorto = () => {
       const res = await api.get(
         `${API_BASE_URL}/template/portfolio?page=${page}&size=${pageSize}`
       );
-
+  
       if (res.data.success) {
         const { content, totalPages } = res.data.data;
-
-        // ✅ Securely fetch logo & concept images
+  
         const updatedContent = await Promise.all(
           content.map(async (card) => {
             const secureLogoUrl = await fetchSecureImage(card.logoUrl, defaultFile);
@@ -78,19 +90,22 @@ const CardsPorto = () => {
             return { ...card, secureLogoUrl, secureConceptUrl };
           })
         );
-
-        if (page + 1 >= totalPages) {
-          setHasMore(false);
+  
+        if (page + 1 >= totalPages) setHasMore(false);
+  
+        // ✅ Prevent duplicates on first page or dev double-fetch
+        if (page === 0) {
+          setCards(updatedContent);
+        } else {
+          setCards((prev) => [...prev, ...updatedContent]);
         }
-
-        setCards((prev) => [...prev, ...updatedContent]);
       }
     } catch (err) {
       console.error("Error fetching portfolio cards:", err);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   useEffect(() => {
     loadCards();
@@ -182,7 +197,7 @@ const CardsPorto = () => {
             <div className="pt-5 pb-14">
               <CardButton
                 text="DOWNLOAD"
-                onClick={() => handleSecureDownload(card.deliverableUrl, `${card.projectName}.zip`)}
+                onClick={() => handleSecureDownload(card.deliverableUrl)}
               />
             </div>
           </div>

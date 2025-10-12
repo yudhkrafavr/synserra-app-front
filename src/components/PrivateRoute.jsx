@@ -1,3 +1,4 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -17,10 +18,13 @@ function PrivateRoute({ children }) {
     const decoded = jwtDecode(token);
     const isExpired = decoded.exp * 1000 < Date.now();
 
-    // 🧠 If token expired — try refresh first instead of redirecting immediately
     if (isExpired) {
       console.warn("Token expired — attempting refresh...");
-      return <TokenRefresher refreshToken={refreshToken}>{children}</TokenRefresher>;
+      return (
+        <TokenRefresher refreshToken={refreshToken}>
+          {children}
+        </TokenRefresher>
+      );
     }
   } catch (err) {
     console.error("Invalid token:", err);
@@ -33,7 +37,6 @@ function PrivateRoute({ children }) {
   return children;
 }
 
-// 🧩 Small helper component to handle refresh asynchronously
 function TokenRefresher({ refreshToken, children }) {
   const [status, setStatus] = React.useState("loading"); // "loading" | "success" | "failed"
 
@@ -67,16 +70,22 @@ function TokenRefresher({ refreshToken, children }) {
     tryRefresh();
   }, [refreshToken]);
 
-  if (status === "loading") {
-    return <div className="flex justify-center py-10">Refreshing session...</div>;
-  }
-
+  // If failed → redirect
   if (status === "failed") {
     return <Navigate to="/login" replace />;
   }
 
-  // Once refreshed → render protected content
-  return children;
+  // Always render children, but overlay banner if refreshing
+  return (
+    <>
+      {status === "loading" && (
+        <div className="fixed top-0 left-0 w-full bg-yellow-100 text-yellow-800 text-center py-2 text-sm font-medium shadow-md z-50">
+          Reconnecting… Please wait
+        </div>
+      )}
+      {children}
+    </>
+  );
 }
 
 export default PrivateRoute;
