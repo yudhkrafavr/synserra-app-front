@@ -15,6 +15,7 @@ import CardsPorto from "./components/CardsPorto";
 import WidgetPortfolio from "./components/WidgetPortfolio";
 import LoginPage from "./components/LoginPage";
 import PrivateRoute from "./components/PrivateRoute"; // 🟢 added
+import NotFound from "./components/NotFound";
 
 function App() {
   const [isSubmissionModalOpen, setSubmissionModalOpen] = useState(false);
@@ -99,7 +100,18 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+  path="*"
+  element={
+    <PrivateRoute>
+      <NotFound />
+    </PrivateRoute>
+  }
+/>
+
         </Routes>
+        
+
 
         {/* 🟢 Modals are outside router context so they always work */}
         <JobSubmissionModal
