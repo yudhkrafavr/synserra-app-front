@@ -196,7 +196,7 @@ const ProjectCard = ({
     try {
       setLoadingAction(true);
 
-      const response = await api.post(
+      await api.post(
         `${API_BASE_URL}/project/cancel`,
         {
           projectId: id,          // 👈 use id prop from ProjectCard
@@ -205,9 +205,6 @@ const ProjectCard = ({
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Cancel Project:", response.data);
-
-      alert("Project cancelled successfully!");
       if (onReload) onReload(); // refresh list after cancel
       setShowCancelModal(false);
       setCancelReason("");
@@ -436,16 +433,24 @@ const ProjectCard = ({
                 Close
               </button>
               <button
-                onClick={handleCancelSubmit}
-                disabled={!cancelReason.trim()}
-                className={`px-4 py-2 rounded-md ${
-                  cancelReason.trim() 
-                    ? 'bg-red-600 text-white hover:bg-red-700' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Submit
-              </button>
+  onClick={handleCancelSubmit}
+  disabled={!cancelReason.trim() || loadingAction}
+  className={`px-4 py-2 rounded-md flex items-center justify-center ${
+    !cancelReason.trim() || loadingAction
+      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+      : 'bg-red-600 text-white hover:bg-red-700'
+  }`}
+>
+  {loadingAction ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+      Processing...
+    </>
+  ) : (
+    'Submit'
+  )}
+</button>
+
             </div>
           </div>
         </div>
