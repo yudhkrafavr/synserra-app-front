@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
 import axios from "axios";
@@ -68,6 +69,27 @@ const ProjectCard = ({
   };
 
   
+
+  useEffect(() => {
+    let revokeUrl;
+    const loadLogo = async () => {
+      if (logoUrl) {
+        const url = await fetchSecureImage(logoUrl, defaultFile);
+        setSecureLogoUrl(url);
+        revokeUrl = url; // keep for cleanup
+      } else {
+        setSecureLogoUrl(defaultFile);
+      }
+    };
+  
+    loadLogo();
+  
+    return () => {
+      if (revokeUrl) URL.revokeObjectURL(revokeUrl);
+    };
+  }, [logoUrl]);
+  
+
   const handleCancelClick = () => {
     setShowCancelModal(true);
   };
@@ -114,6 +136,19 @@ const ProjectCard = ({
   };
 
     // ✅ helper: use api with token to fetch secured file
+    const fetchSecureImage = async (filePath, fallbackUrl) => {
+      if (!filePath) return fallbackUrl;
+      try {
+        const response = await api.get(`/utility/uploads/${filePath}`, {
+          responseType: "blob",
+        });
+        return URL.createObjectURL(response.data);
+      } catch (err) {
+        console.warn("Failed to load secure image:", err);
+        return fallbackUrl;
+      }
+    };
+
   const handleDownload = async () => {
     if (!templateUrl) {
       alert("No template available to download.");
@@ -263,12 +298,14 @@ const ProjectCard = ({
 )}
 
         <div className="w-[80px]">
-        <img
-  src={logoUrl ? `${UPLOADS_BASE_URL}${logoUrl}` : defaultFile}
-  alt="logo"
-  className="w-[80px]"
-/>
         <div className="w-[80px]">
+  <img
+    src={secureLogoUrl}
+    alt="logo"
+    className="w-[80px] object-contain"
+  />
+</div>
+
         </div>
         <div className="flex justify-between w-[85%]">
           <div className="w-full">
