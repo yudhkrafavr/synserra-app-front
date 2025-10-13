@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
 import axios from "axios";
@@ -45,6 +44,7 @@ const ProjectCard = ({
   deliverableFile
 }) => {
   const [details, setDetails] = useState({});
+  const [secureLogoUrl, setSecureLogoUrl] = useState(defaultFile);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
@@ -67,6 +67,7 @@ const ProjectCard = ({
     return response.data?.data?.id || null;
   };
 
+  
   const handleCancelClick = () => {
     setShowCancelModal(true);
   };
@@ -112,6 +113,7 @@ const ProjectCard = ({
     }
   };
 
+    // ✅ helper: use api with token to fetch secured file
   const handleDownload = async () => {
     if (!templateUrl) {
       alert("No template available to download.");
@@ -266,6 +268,7 @@ const ProjectCard = ({
   alt="logo"
   className="w-[80px]"
 />
+        <div className="w-[80px]">
         </div>
         <div className="flex justify-between w-[85%]">
           <div className="w-full">
