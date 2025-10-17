@@ -51,16 +51,23 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const res = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-        const newToken = res.data.access_token || res.data.accessToken;
+        const newAccessToken = res.data.access_token;
+        const newRefreshToken = res.data.refresh_token;
 
-        if (newToken) {
-          localStorage.setItem("access_token", newToken);
-          api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          onRefreshed(newToken);
-          return api(originalRequest);
-        } else {
-          throw new Error("No new token in response");
-        }
+  if (newAccessToken) {
+  localStorage.setItem("access_token", newAccessToken);
+  if (newRefreshToken) {
+    localStorage.setItem("refresh_token", newRefreshToken);
+  }
+
+  api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+  onRefreshed(newAccessToken);
+
+  return api(originalRequest);
+} else {
+  throw new Error("No new token in response");
+}
+
       } catch (refreshError) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
